@@ -15,8 +15,9 @@ function extractYouTubeId(url: string): string | null {
   return match ? match[1] : null;
 }
 
-function LessonsList({ moduleId, canEdit }: { moduleId: string; canEdit: boolean }) {
+function LessonsList({ moduleId, courseId, canEdit }: { moduleId: string; courseId: string; canEdit: boolean }) {
   const { data: lessons = [], isLoading } = useLessons(moduleId);
+  const navigate = useNavigate();
   const deleteLesson = useDeleteLesson();
   const createLesson = useCreateLesson();
   const [open, setOpen] = useState(false);
@@ -43,7 +44,7 @@ function LessonsList({ moduleId, canEdit }: { moduleId: string; canEdit: boolean
       {lessons.map((lesson, i) => {
         const videoId = lesson.youtube_url ? extractYouTubeId(lesson.youtube_url) : null;
         return (
-          <div key={lesson.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent/50 group">
+          <div key={lesson.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent/50 group cursor-pointer" onClick={() => navigate(`/cursos/${courseId}/aula/${lesson.id}`)}>
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 text-primary text-xs font-medium shrink-0">
               {i + 1}
             </div>
@@ -201,7 +202,7 @@ function ModuleItem({ module, index, canEdit, onDelete }: { module: Module; inde
         </CollapsibleTrigger>
         <CollapsibleContent>
           <CardContent className="pt-0 pb-4">
-            <LessonsList moduleId={module.id} canEdit={canEdit} />
+            <LessonsList moduleId={module.id} courseId={module.course_id} canEdit={canEdit} />
           </CardContent>
         </CollapsibleContent>
       </Collapsible>
