@@ -9,6 +9,7 @@ import LoginPage from "@/pages/LoginPage";
 import CadastroPublico from "@/pages/CadastroPublico";
 import DashboardPage from "@/pages/DashboardPage";
 import CursosPage from "@/pages/CursosPage";
+import CourseDetailPage from "@/pages/CourseDetailPage";
 import AlunosPage from "@/pages/AlunosPage";
 import NotFound from "./pages/NotFound";
 
