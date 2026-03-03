@@ -9,6 +9,7 @@ import LoginPage from "@/pages/LoginPage";
 import CadastroPublico from "@/pages/CadastroPublico";
 import DashboardPage from "@/pages/DashboardPage";
 import CursosPage from "@/pages/CursosPage";
+import CourseDetailPage from "@/pages/CourseDetailPage";
 import AlunosPage from "@/pages/AlunosPage";
 import NotFound from "./pages/NotFound";
 
@@ -49,6 +50,7 @@ const App = () => (
             <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/cursos" element={<CursosPage />} />
+              <Route path="/cursos/:id" element={<CourseDetailPage />} />
               <Route path="/alunos" element={<AlunosPage />} />
               <Route path="/professores" element={<DashboardPage />} />
               <Route path="/importar" element={<DashboardPage />} />
