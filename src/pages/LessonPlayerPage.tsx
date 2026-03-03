@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { ArrowLeft, CheckCircle, Play, Lock, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { LessonQuiz } from '@/components/LessonQuiz';
 import type { Tables } from '@/integrations/supabase/types';
 
 function extractYouTubeId(url: string): string | null {
@@ -20,6 +22,8 @@ export default function LessonPlayerPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const qc = useQueryClient();
+  const [quizPassed, setQuizPassed] = useState(false);
+  const [quizScore, setQuizScore] = useState<number | null>(null);
 
   const { data: lesson, isLoading: loadingLesson } = useQuery({
     queryKey: ['lesson', lessonId],
@@ -64,7 +68,6 @@ export default function LessonPlayerPage() {
     },
   });
 
-  // Siblings: all lessons in same module
   const { data: siblings = [] } = useQuery({
     queryKey: ['lessons', lesson?.module_id],
     enabled: !!lesson?.module_id,
@@ -87,6 +90,7 @@ export default function LessonPlayerPage() {
         user_id: user!.id,
         completed: true,
         completed_at: new Date().toISOString(),
+        quiz_score: quizScore,
       }, { onConflict: 'lesson_id,user_id' });
       if (error) throw error;
     },
@@ -121,6 +125,13 @@ export default function LessonPlayerPage() {
   const prevLesson = currentIndex > 0 ? siblings[currentIndex - 1] : null;
   const nextLesson = currentIndex < siblings.length - 1 ? siblings[currentIndex + 1] : null;
   const isCompleted = progress?.completed === true;
+  const hasQuiz = lesson.has_quiz === true;
+  const canComplete = !hasQuiz || quizPassed || isCompleted;
+
+  const handleQuizPass = (score: number) => {
+    setQuizPassed(true);
+    setQuizScore(score);
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -163,6 +174,11 @@ export default function LessonPlayerPage() {
         </Card>
       )}
 
+      {/* Quiz Section */}
+      {hasQuiz && !isCompleted && (
+        <LessonQuiz lessonId={lessonId!} onPass={handleQuizPass} />
+      )}
+
       {/* Actions */}
       <div className="flex items-center justify-between gap-3">
         <Button
@@ -176,15 +192,17 @@ export default function LessonPlayerPage() {
         {!isCompleted ? (
           <Button
             onClick={() => completeLesson.mutate()}
-            disabled={completeLesson.isPending}
+            disabled={completeLesson.isPending || !canComplete}
             className="px-6"
           >
             {completeLesson.isPending ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : !canComplete ? (
+              <Lock className="mr-2 h-4 w-4" />
             ) : (
               <CheckCircle className="mr-2 h-4 w-4" />
             )}
-            Concluir Aula
+            {!canComplete ? 'Complete o Quiz (60%)' : 'Concluir Aula'}
           </Button>
         ) : (
           <div />
@@ -199,7 +217,7 @@ export default function LessonPlayerPage() {
         </Button>
       </div>
 
-      {/* Lesson List Sidebar */}
+      {/* Lesson List */}
       <Card className="glass-card">
         <CardHeader className="py-3">
           <CardTitle className="text-sm">Aulas deste módulo</CardTitle>
