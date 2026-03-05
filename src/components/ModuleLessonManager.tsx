@@ -24,6 +24,7 @@ function LessonsList({ moduleId, courseId, canEdit }: { moduleId: string; course
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [quizLessonId, setQuizLessonId] = useState<string | null>(null);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,21 +52,39 @@ function LessonsList({ moduleId, courseId, canEdit }: { moduleId: string; course
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{lesson.title}</p>
-              {videoId && (
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Play className="h-3 w-3" /> YouTube
-                </p>
-              )}
+              <div className="flex items-center gap-2">
+                {videoId && (
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Play className="h-3 w-3" /> YouTube
+                  </p>
+                )}
+                {lesson.has_quiz && (
+                  <p className="text-xs text-primary flex items-center gap-1">
+                    <HelpCircle className="h-3 w-3" /> Quiz
+                  </p>
+                )}
+              </div>
             </div>
             {canEdit && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 opacity-0 group-hover:opacity-100 text-destructive"
-                onClick={() => deleteLesson.mutate({ id: lesson.id, moduleId })}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  title="Editar Quiz"
+                  onClick={(e) => { e.stopPropagation(); setQuizLessonId(lesson.id); }}
+                >
+                  <HelpCircle className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-destructive"
+                  onClick={(e) => { e.stopPropagation(); deleteLesson.mutate({ id: lesson.id, moduleId }); }}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
             )}
           </div>
         );
@@ -74,32 +93,43 @@ function LessonsList({ moduleId, courseId, canEdit }: { moduleId: string; course
         <p className="text-xs text-muted-foreground py-2">Nenhuma aula neste módulo</p>
       )}
       {canEdit && (
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button variant="ghost" size="sm" className="text-xs mt-1">
-              <Plus className="h-3 w-3 mr-1" /> Adicionar Aula
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Nova Aula</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleCreate} className="space-y-4">
-              <div className="space-y-2">
-                <Label>Título da Aula</Label>
-                <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="Ex: Introdução" required />
-              </div>
-              <div className="space-y-2">
-                <Label>Link do YouTube</Label>
-                <Input value={youtubeUrl} onChange={e => setYoutubeUrl(e.target.value)} placeholder="https://youtube.com/watch?v=..." />
-              </div>
-              <Button type="submit" className="w-full" disabled={createLesson.isPending}>
-                {createLesson.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Criar Aula
+        <>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="sm" className="text-xs mt-1">
+                <Plus className="h-3 w-3 mr-1" /> Adicionar Aula
               </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Nova Aula</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleCreate} className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Título da Aula</Label>
+                  <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="Ex: Introdução" required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Link do YouTube</Label>
+                  <Input value={youtubeUrl} onChange={e => setYoutubeUrl(e.target.value)} placeholder="https://youtube.com/watch?v=..." />
+                </div>
+                <Button type="submit" className="w-full" disabled={createLesson.isPending}>
+                  {createLesson.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Criar Aula
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={!!quizLessonId} onOpenChange={(v) => !v && setQuizLessonId(null)}>
+            <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Editar Quiz</DialogTitle>
+              </DialogHeader>
+              {quizLessonId && <QuizEditor lessonId={quizLessonId} />}
+            </DialogContent>
+          </Dialog>
+        </>
       )}
     </div>
   );
