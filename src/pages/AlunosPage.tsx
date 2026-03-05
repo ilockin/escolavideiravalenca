@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { CsvImportDialog } from '@/components/CsvImportDialog';
 
 interface Enrollment {
   id: string;
@@ -94,19 +95,10 @@ export default function AlunosPage() {
                 <TableCell>{e.created_at ? new Date(e.created_at).toLocaleDateString('pt-BR') : '—'}</TableCell>
                 {showActions && (
                   <TableCell className="text-right space-x-2">
-                    <Button
-                      size="sm"
-                      onClick={() => updateStatus.mutate({ id: e.id, status: 'aprovado' })}
-                      disabled={updateStatus.isPending}
-                    >
+                    <Button size="sm" onClick={() => updateStatus.mutate({ id: e.id, status: 'aprovado' })} disabled={updateStatus.isPending}>
                       <Check className="h-4 w-4 mr-1" /> Aprovar
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => updateStatus.mutate({ id: e.id, status: 'reprovado' })}
-                      disabled={updateStatus.isPending}
-                    >
+                    <Button size="sm" variant="destructive" onClick={() => updateStatus.mutate({ id: e.id, status: 'reprovado' })} disabled={updateStatus.isPending}>
                       <X className="h-4 w-4 mr-1" /> Reprovar
                     </Button>
                   </TableCell>
@@ -121,9 +113,12 @@ export default function AlunosPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-2xl font-bold">Alunos</h1>
-        <p className="text-muted-foreground">Gerencie os alunos matriculados</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Alunos</h1>
+          <p className="text-muted-foreground">Gerencie os alunos matriculados</p>
+        </div>
+        <CsvImportDialog onSuccess={() => queryClient.invalidateQueries({ queryKey: ['enrollments'] })} />
       </div>
 
       <Tabs defaultValue="pendentes" className="w-full">
