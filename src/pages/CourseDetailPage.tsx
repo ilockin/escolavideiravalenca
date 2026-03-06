@@ -137,6 +137,24 @@ export default function CourseDetailPage() {
         </CardContent>
       </Card>
 
+      {/* Certificate Download */}
+      {isStudent && courseCompletion?.completed && (
+        <Card className="glass-card border-primary/30 bg-primary/5">
+          <CardContent className="py-4">
+            <div className="flex items-center gap-3">
+              <Award className="h-6 w-6 text-primary shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-medium">Parabéns! Você concluiu este curso 🎓</p>
+                <p className="text-xs text-muted-foreground">Baixe seu certificado de conclusão</p>
+              </div>
+              <Button size="sm" onClick={handleDownloadCertificate}>
+                <Award className="h-4 w-4 mr-1" /> Baixar Certificado
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Modules & Lessons */}
       <ModuleLessonManager courseId={course.id} canEdit={canEdit} />
     </div>
