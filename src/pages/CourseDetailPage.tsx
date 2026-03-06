@@ -4,8 +4,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { ModuleLessonManager } from '@/components/ModuleLessonManager';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Trash2, Link as LinkIcon, Copy, Loader2 } from 'lucide-react';
+import { ArrowLeft, Trash2, Link as LinkIcon, Copy, Loader2, Award } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { generateCertificate } from '@/lib/generateCertificate';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
