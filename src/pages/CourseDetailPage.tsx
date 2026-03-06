@@ -17,11 +17,44 @@ import {
 export default function CourseDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { role } = useAuth();
+  const { role, user } = useAuth();
   const { data: course, isLoading } = useCourse(id);
   const deleteCourse = useDeleteCourse();
   const { toast } = useToast();
   const canEdit = role === 'editor';
+  const isStudent = role === 'aluno';
+
+  // Check if current student completed 100% of the course
+  const { data: courseCompletion } = useQuery({
+    queryKey: ['course-completion', id, user?.id],
+    enabled: isStudent && !!id && !!user?.id,
+    queryFn: async () => {
+      const { data: allLessons } = await supabase
+        .from('lessons')
+        .select('id, modules!inner(course_id)')
+        .eq('modules.course_id', id!);
+      if (!allLessons?.length) return { completed: false, total: 0, done: 0 };
+
+      const lessonIds = allLessons.map((l) => l.id);
+      const { data: progress } = await supabase
+        .from('lesson_progress')
+        .select('lesson_id, completed')
+        .eq('user_id', user!.id)
+        .in('lesson_id', lessonIds);
+
+      const done = progress?.filter((p) => p.completed).length ?? 0;
+      return { completed: done >= allLessons.length, total: allLessons.length, done };
+    },
+  });
+
+  const handleDownloadCertificate = async () => {
+    const { data: profile } = await supabase.from('profiles').select('full_name').eq('user_id', user!.id).single();
+    generateCertificate({
+      studentName: profile?.full_name || user!.email || 'Aluno',
+      courseName: course?.title || 'Curso',
+      completionDate: new Date(),
+    });
+  };
 
   const enrollmentLink = `${window.location.origin}/cadastro?curso_id=${id}`;
 
