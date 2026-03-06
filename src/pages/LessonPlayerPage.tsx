@@ -6,9 +6,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { ArrowLeft, CheckCircle, Play, Lock, Loader2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Play, Lock, Loader2, Award } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { LessonQuiz } from '@/components/LessonQuiz';
+import { generateCertificate } from '@/lib/generateCertificate';
 import type { Tables } from '@/integrations/supabase/types';
 
 function extractYouTubeId(url: string): string | null {
