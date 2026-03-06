@@ -259,6 +259,9 @@ export default function LessonPlayerPage() {
         </Button>
       </div>
 
+      {/* Comments */}
+      <LessonComments lessonId={lessonId!} />
+
       {/* Lesson List */}
       <Card className="glass-card">
         <CardHeader className="py-3">
