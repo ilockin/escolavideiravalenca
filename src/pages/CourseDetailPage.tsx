@@ -4,8 +4,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { ModuleLessonManager } from '@/components/ModuleLessonManager';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Trash2, Link as LinkIcon, Copy, Loader2 } from 'lucide-react';
+import { ArrowLeft, Trash2, Link as LinkIcon, Copy, Loader2, Award } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { generateCertificate } from '@/lib/generateCertificate';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -14,11 +17,44 @@ import {
 export default function CourseDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { role } = useAuth();
+  const { role, user } = useAuth();
   const { data: course, isLoading } = useCourse(id);
   const deleteCourse = useDeleteCourse();
   const { toast } = useToast();
   const canEdit = role === 'editor';
+  const isStudent = role === 'aluno';
+
+  // Check if current student completed 100% of the course
+  const { data: courseCompletion } = useQuery({
+    queryKey: ['course-completion', id, user?.id],
+    enabled: isStudent && !!id && !!user?.id,
+    queryFn: async () => {
+      const { data: allLessons } = await supabase
+        .from('lessons')
+        .select('id, modules!inner(course_id)')
+        .eq('modules.course_id', id!);
+      if (!allLessons?.length) return { completed: false, total: 0, done: 0 };
+
+      const lessonIds = allLessons.map((l) => l.id);
+      const { data: progress } = await supabase
+        .from('lesson_progress')
+        .select('lesson_id, completed')
+        .eq('user_id', user!.id)
+        .in('lesson_id', lessonIds);
+
+      const done = progress?.filter((p) => p.completed).length ?? 0;
+      return { completed: done >= allLessons.length, total: allLessons.length, done };
+    },
+  });
+
+  const handleDownloadCertificate = async () => {
+    const { data: profile } = await supabase.from('profiles').select('full_name').eq('user_id', user!.id).single();
+    generateCertificate({
+      studentName: profile?.full_name || user!.email || 'Aluno',
+      courseName: course?.title || 'Curso',
+      completionDate: new Date(),
+    });
+  };
 
   const enrollmentLink = `${window.location.origin}/cadastro?curso_id=${id}`;
 
@@ -100,6 +136,24 @@ export default function CourseDetailPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Certificate Download */}
+      {isStudent && courseCompletion?.completed && (
+        <Card className="glass-card border-primary/30 bg-primary/5">
+          <CardContent className="py-4">
+            <div className="flex items-center gap-3">
+              <Award className="h-6 w-6 text-primary shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-medium">Parabéns! Você concluiu este curso 🎓</p>
+                <p className="text-xs text-muted-foreground">Baixe seu certificado de conclusão</p>
+              </div>
+              <Button size="sm" onClick={handleDownloadCertificate}>
+                <Award className="h-4 w-4 mr-1" /> Baixar Certificado
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Modules & Lessons */}
       <ModuleLessonManager courseId={course.id} canEdit={canEdit} />
