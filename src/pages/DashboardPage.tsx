@@ -4,6 +4,10 @@ import { BookOpen, Users, GraduationCap, BarChart3, Clock, CheckCircle } from 'l
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import { useState } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Progress } from '@/components/ui/progress';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const COLORS = [
   'hsl(var(--primary))',
@@ -148,6 +152,121 @@ function StudentDashboard({ userId }: { userId: string | undefined }) {
   );
 }
 
+function useStudentProgressByCourse(courseId: string | undefined) {
+  return useQuery({
+    queryKey: ['student-progress-by-course', courseId],
+    enabled: !!courseId,
+    queryFn: async () => {
+      // Get approved enrollments for this course
+      const { data: enrollments } = await supabase
+        .from('enrollments')
+        .select('id, student_name, student_email, user_id')
+        .eq('course_id', courseId!)
+        .eq('status', 'aprovado');
+
+      // Get all lessons for this course
+      const { data: lessons } = await supabase
+        .from('lessons')
+        .select('id, module_id, modules!inner(course_id)')
+        .eq('modules.course_id', courseId!);
+
+      const totalLessons = lessons?.length ?? 0;
+      if (!enrollments?.length || totalLessons === 0) return [];
+
+      // Get progress for enrolled users
+      const userIds = enrollments.filter((e) => e.user_id).map((e) => e.user_id!);
+      const lessonIds = lessons!.map((l) => l.id);
+
+      let progressData: any[] = [];
+      if (userIds.length > 0 && lessonIds.length > 0) {
+        const { data } = await supabase
+          .from('lesson_progress')
+          .select('user_id, completed')
+          .in('user_id', userIds)
+          .in('lesson_id', lessonIds);
+        progressData = data ?? [];
+      }
+
+      return enrollments.map((e) => {
+        const completed = progressData.filter((p) => p.user_id === e.user_id && p.completed).length;
+        const pct = Math.round((completed / totalLessons) * 100);
+        return { name: e.student_name, email: e.student_email, completed, total: totalLessons, pct };
+      });
+    },
+  });
+}
+
+function StudentProgressSection() {
+  const [selectedCourse, setSelectedCourse] = useState<string | undefined>();
+
+  const { data: courses = [] } = useQuery({
+    queryKey: ['courses-list'],
+    queryFn: async () => {
+      const { data } = await supabase.from('courses').select('id, title').order('title');
+      return data ?? [];
+    },
+  });
+
+  const { data: students = [], isLoading } = useStudentProgressByCourse(selectedCourse);
+
+  return (
+    <Card className="glass-card">
+      <CardHeader>
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <CardTitle className="text-lg">Progresso Individual por Curso</CardTitle>
+          <Select value={selectedCourse ?? ''} onValueChange={(v) => setSelectedCourse(v || undefined)}>
+            <SelectTrigger className="w-[240px]">
+              <SelectValue placeholder="Selecione um curso" />
+            </SelectTrigger>
+            <SelectContent>
+              {courses.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {!selectedCourse ? (
+          <p className="text-sm text-muted-foreground">Selecione um curso para ver o progresso dos alunos.</p>
+        ) : isLoading ? (
+          <p className="text-sm text-muted-foreground">Carregando...</p>
+        ) : students.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhum aluno aprovado neste curso.</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Aluno</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Aulas</TableHead>
+                <TableHead className="w-[200px]">Progresso</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {students.map((s, i) => (
+                <TableRow key={i}>
+                  <TableCell className="font-medium">{s.name}</TableCell>
+                  <TableCell className="text-muted-foreground">{s.email}</TableCell>
+                  <TableCell>{s.completed}/{s.total}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Progress value={s.pct} className="h-2 flex-1" />
+                      <span className="text-xs text-muted-foreground w-10 text-right">{s.pct}%</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 function AdminDashboard({ role }: { role: string | null }) {
   const { data, isLoading } = useDashboardStats();
 
@@ -219,6 +338,8 @@ function AdminDashboard({ role }: { role: string | null }) {
           </CardContent>
         </Card>
       </div>
+
+      <StudentProgressSection />
 
       {data?.recent && data.recent.length > 0 && (
         <Card className="glass-card">
