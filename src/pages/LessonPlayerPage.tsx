@@ -9,6 +9,7 @@ import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { ArrowLeft, CheckCircle, Play, Lock, Loader2, Award } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { LessonQuiz } from '@/components/LessonQuiz';
+import { LessonComments } from '@/components/LessonComments';
 import { generateCertificate } from '@/lib/generateCertificate';
 import type { Tables } from '@/integrations/supabase/types';
 
