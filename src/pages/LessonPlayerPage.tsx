@@ -95,9 +95,49 @@ export default function LessonPlayerPage() {
       }, { onConflict: 'lesson_id,user_id' });
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       qc.invalidateQueries({ queryKey: ['lesson-progress', lessonId, user?.id] });
       toast({ title: 'Aula concluída! ✅' });
+
+      // Check if the entire course is now 100% complete
+      try {
+        const { data: allLessons } = await supabase
+          .from('lessons')
+          .select('id, modules!inner(course_id)')
+          .eq('modules.course_id', courseId!);
+
+        if (!allLessons?.length) return;
+
+        const lessonIds = allLessons.map((l) => l.id);
+        const { data: allProgress } = await supabase
+          .from('lesson_progress')
+          .select('lesson_id, completed')
+          .eq('user_id', user!.id)
+          .in('lesson_id', lessonIds);
+
+        const completedCount = allProgress?.filter((p) => p.completed).length ?? 0;
+
+        if (completedCount >= allLessons.length) {
+          // Get student name and course name for the certificate
+          const [profileRes, courseRes] = await Promise.all([
+            supabase.from('profiles').select('full_name').eq('user_id', user!.id).single(),
+            supabase.from('courses').select('title').eq('id', courseId!).single(),
+          ]);
+
+          const studentName = profileRes.data?.full_name || user!.email || 'Aluno';
+          const courseName = courseRes.data?.title || 'Curso';
+
+          generateCertificate({
+            studentName,
+            courseName,
+            completionDate: new Date(),
+          });
+
+          toast({ title: '🎓 Parabéns! Curso concluído!', description: 'Seu certificado foi gerado.' });
+        }
+      } catch {
+        // silently ignore certificate generation errors
+      }
     },
     onError: (err: any) => {
       toast({ title: 'Erro', description: err.message, variant: 'destructive' });
