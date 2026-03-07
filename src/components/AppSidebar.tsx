@@ -29,6 +29,7 @@ import {
 const editorItems = [
 { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
 { title: 'Cursos', url: '/cursos', icon: BookOpen },
+{ title: 'Turmas', url: '/turmas', icon: Users },
 { title: 'Alunos', url: '/alunos', icon: Users },
 { title: 'Professores', url: '/professores', icon: GraduationCap },
 { title: 'Importar CSV', url: '/importar', icon: Upload },
@@ -40,6 +41,7 @@ const editorItems = [
 const professorItems = [
 { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
 { title: 'Meus Cursos', url: '/cursos', icon: BookOpen },
+{ title: 'Turmas', url: '/turmas', icon: Users },
 { title: 'Alunos', url: '/alunos', icon: Users },
 { title: 'Importar CSV', url: '/importar', icon: Upload },
 { title: 'Comentários', url: '/comentarios', icon: MessageSquare },
