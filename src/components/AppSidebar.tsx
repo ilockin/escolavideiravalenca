@@ -9,7 +9,8 @@ import {
   FileText,
   BarChart3,
   MessageSquare,
-  Upload } from
+  Upload,
+  UserCog } from
 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import {
@@ -35,6 +36,7 @@ const editorItems = [
 { title: 'Importar CSV', url: '/importar', icon: Upload },
 { title: 'Notificações', url: '/notificacoes', icon: Bell },
 { title: 'Relatórios', url: '/relatorios', icon: BarChart3 },
+{ title: 'Gestão de Contas', url: '/conta', icon: UserCog },
 { title: 'Configurações', url: '/configuracoes', icon: Settings }];
 
 
@@ -45,13 +47,15 @@ const professorItems = [
 { title: 'Alunos', url: '/alunos', icon: Users },
 { title: 'Importar CSV', url: '/importar', icon: Upload },
 { title: 'Comentários', url: '/comentarios', icon: MessageSquare },
-{ title: 'Desempenho', url: '/desempenho', icon: BarChart3 }];
+{ title: 'Desempenho', url: '/desempenho', icon: BarChart3 },
+{ title: 'Gestão de Contas', url: '/conta', icon: UserCog }];
 
 
 const alunoItems = [
 { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
 { title: 'Meus Cursos', url: '/meus-cursos', icon: BookOpen },
-{ title: 'Certificados', url: '/certificados', icon: FileText }];
+{ title: 'Certificados', url: '/certificados', icon: FileText },
+{ title: 'Minha Conta', url: '/conta', icon: UserCog }];
 
 
 interface AppSidebarProps {

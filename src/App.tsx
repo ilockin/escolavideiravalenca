@@ -13,6 +13,7 @@ import CourseDetailPage from "@/pages/CourseDetailPage";
 import LessonPlayerPage from "@/pages/LessonPlayerPage";
 import AlunosPage from "@/pages/AlunosPage";
 import TurmasPage from "@/pages/TurmasPage";
+import ContaPage from "@/pages/ContaPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -65,6 +66,7 @@ const App = () => (
               <Route path="/desempenho" element={<DashboardPage />} />
               <Route path="/meus-cursos" element={<CursosPage />} />
               <Route path="/certificados" element={<DashboardPage />} />
+              <Route path="/conta" element={<ContaPage />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
