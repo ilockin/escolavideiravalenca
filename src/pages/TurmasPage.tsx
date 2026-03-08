@@ -61,7 +61,7 @@ function CreateTurmaDialog() {
   );
 }
 
-function TurmaDetail({ turmaId, onClose }: { turmaId: string; onClose: () => void }) {
+function TurmaDetail({ turmaId, inviteCode, onClose }: { turmaId: string; inviteCode: string; onClose: () => void }) {
   const { data: turmaCourses = [], isLoading: loadingCourses } = useTurmaCourses(turmaId);
   const { data: turmaStudents = [], isLoading: loadingStudents } = useTurmaStudents(turmaId);
   const { data: allCourses = [] } = useCourses();
@@ -72,6 +72,15 @@ function TurmaDetail({ turmaId, onClose }: { turmaId: string; onClose: () => voi
   const removeStudent = useRemoveStudentFromTurma();
   const [selectedCourse, setSelectedCourse] = useState('');
   const [selectedStudent, setSelectedStudent] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  const inviteLink = `${window.location.origin}/cadastro/turma/${inviteCode}`;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(inviteLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const linkedCourseIds = turmaCourses.map((tc: any) => tc.course_id);
   const linkedStudentIds = turmaStudents.map((ts: any) => ts.user_id);
@@ -83,6 +92,22 @@ function TurmaDetail({ turmaId, onClose }: { turmaId: string; onClose: () => voi
       <Button variant="ghost" size="sm" onClick={onClose}>
         <X className="mr-1 h-4 w-4" /> Voltar
       </Button>
+
+      {/* Invite Link */}
+      <Card className="glass-card">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2"><Link2 className="h-5 w-5" />Link de Cadastro</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-3">Compartilhe este link para que novos alunos se cadastrem diretamente nesta turma.</p>
+          <div className="flex gap-2">
+            <Input value={inviteLink} readOnly className="flex-1 text-xs" />
+            <Button variant="outline" size="icon" onClick={handleCopy}>
+              {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Courses Section */}
       <Card className="glass-card">
