@@ -42,13 +42,16 @@ const editorItems = [
 
 const professorItems = [
 { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
-{ title: 'Meus Cursos', url: '/cursos', icon: BookOpen },
+{ title: 'Cursos', url: '/cursos', icon: BookOpen },
 { title: 'Turmas', url: '/turmas', icon: Users },
 { title: 'Alunos', url: '/alunos', icon: Users },
 { title: 'Importar CSV', url: '/importar', icon: Upload },
+{ title: 'Notificações', url: '/notificacoes', icon: Bell },
+{ title: 'Relatórios', url: '/relatorios', icon: BarChart3 },
 { title: 'Comentários', url: '/comentarios', icon: MessageSquare },
 { title: 'Desempenho', url: '/desempenho', icon: BarChart3 },
-{ title: 'Gestão de Contas', url: '/conta', icon: UserCog }];
+{ title: 'Gestão de Contas', url: '/conta', icon: UserCog },
+{ title: 'Configurações', url: '/configuracoes', icon: Settings }];
 
 
 const alunoItems = [

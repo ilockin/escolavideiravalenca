@@ -169,13 +169,15 @@ export default function ContaPage() {
     enabled: !!user,
   });
 
+  const currentRole = role;
   const { data: studentProfiles = [] } = useQuery({
-    queryKey: ['all-student-profiles'],
+    queryKey: ['all-student-profiles', currentRole],
     queryFn: async () => {
-      const { data: roles, error: rolesError } = await supabase
+    const rolesToFetch: Array<'aluno' | 'editor' | 'professor'> = currentRole === 'editor' ? ['aluno', 'professor'] : ['aluno'];
+    const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
-        .select('user_id')
-        .eq('role', 'aluno');
+        .select('user_id, role')
+        .in('role', rolesToFetch);
       if (rolesError) throw rolesError;
 
       const studentIds = roles.map((r) => r.user_id);
@@ -248,7 +250,7 @@ export default function ContaPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
-              <CardTitle className="text-lg">Gerenciar Contas de Alunos</CardTitle>
+              <CardTitle className="text-lg">Gerenciar Contas</CardTitle>
               <CardDescription>Edite dados e redefina senhas dos alunos</CardDescription>
             </div>
             <CreateStudentDialog onSuccess={invalidateAll} />
