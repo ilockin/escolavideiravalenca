@@ -208,6 +208,7 @@ export type Database = {
       }
       modules: {
         Row: {
+          close_date: string | null
           course_id: string
           created_at: string | null
           id: string
@@ -219,6 +220,7 @@ export type Database = {
           title: string
         }
         Insert: {
+          close_date?: string | null
           course_id: string
           created_at?: string | null
           id?: string
@@ -230,6 +232,7 @@ export type Database = {
           title: string
         }
         Update: {
+          close_date?: string | null
           course_id?: string
           created_at?: string | null
           id?: string

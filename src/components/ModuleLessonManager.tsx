@@ -6,10 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Plus, Trash2, ChevronDown, Play, Loader2, Layers, HelpCircle } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, Play, Loader2, Layers, HelpCircle, Lock, Unlock } from 'lucide-react';
 import { useModules, useLessons, useCreateModule, useDeleteModule, useCreateLesson, useDeleteLesson } from '@/hooks/useCourses';
 import type { Module } from '@/hooks/useCourses';
 import { QuizEditor } from '@/components/QuizEditor';
+import { ModuleSettingsDialog } from '@/components/ModuleSettingsDialog';
 
 function extractYouTubeId(url: string): string | null {
   const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([a-zA-Z0-9_-]{11})/);
@@ -221,6 +222,16 @@ function ModuleItem({ module, index, canEdit, onDelete }: { module: Module; inde
                 <CardTitle className="text-base">{module.title}</CardTitle>
               </div>
               <div className="flex items-center gap-2">
+                {module.is_released ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-600">
+                    <Unlock className="h-3 w-3" /> Aberto
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-medium text-amber-600">
+                    <Lock className="h-3 w-3" /> Fechado
+                  </span>
+                )}
+                {canEdit && <ModuleSettingsDialog module={module} />}
                 {canEdit && (
                   <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={(e) => { e.stopPropagation(); onDelete(); }}>
                     <Trash2 className="h-3.5 w-3.5" />
