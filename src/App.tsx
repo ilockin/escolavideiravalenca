@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/DashboardLayout";
 import LoginPage from "@/pages/LoginPage";
 import CadastroPublico from "@/pages/CadastroPublico";
+import CadastroTurmaPage from "@/pages/CadastroTurmaPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import DashboardPage from "@/pages/DashboardPage";
 import CursosPage from "@/pages/CursosPage";
