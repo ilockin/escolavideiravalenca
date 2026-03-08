@@ -50,6 +50,7 @@ const App = () => (
           <Routes>
             <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
             <Route path="/cadastro" element={<CadastroPublico />} />
+            <Route path="/cadastro/turma/:code" element={<CadastroTurmaPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             

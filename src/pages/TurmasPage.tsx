@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Loader2, Trash2, Users, BookOpen, X, ChevronRight } from 'lucide-react';
+import { Plus, Loader2, Trash2, Users, BookOpen, X, ChevronRight, Link2, Copy, Check } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   useTurmas, useCreateTurma, useDeleteTurma,
