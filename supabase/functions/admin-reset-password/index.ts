@@ -60,6 +60,21 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Professors cannot reset editor passwords
+    if (roleData.role === "professor") {
+      const { data: targetRole } = await adminClient
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", target_user_id)
+        .single();
+      if (targetRole?.role === "editor") {
+        return new Response(JSON.stringify({ error: "Professores não podem alterar dados do Super Admin" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     // Update the target user's password using admin API
     const { error: updateError } = await adminClient.auth.admin.updateUserById(target_user_id, {
       password: new_password,
