@@ -131,7 +131,7 @@ function TurmaDetail({ turmaId, onClose }: { turmaId: string; onClose: () => voi
             <Select value={selectedStudent} onValueChange={setSelectedStudent}>
               <SelectTrigger className="flex-1"><SelectValue placeholder="Selecionar aluno" /></SelectTrigger>
               <SelectContent>
-                {availableStudents.map(s => <SelectItem key={s.user_id} value={s.user_id}>{s.full_name || s.user_id}</SelectItem>)}
+                {availableStudents.map(s => <SelectItem key={s.user_id} value={s.user_id}>{s.full_name || s.email || 'Sem nome'}</SelectItem>)}
                 {availableStudents.length === 0 && <div className="px-3 py-2 text-sm text-muted-foreground">Todos os alunos já adicionados</div>}
               </SelectContent>
             </Select>
