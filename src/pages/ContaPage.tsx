@@ -172,10 +172,12 @@ export default function ContaPage() {
   const { data: studentProfiles = [] } = useQuery({
     queryKey: ['all-student-profiles'],
     queryFn: async () => {
-      const { data: roles, error: rolesError } = await supabase
+    // Professors can only see alunos; editors can see alunos and professors
+    const rolesToFetch = currentRole === 'editor' ? ['aluno', 'professor'] : ['aluno'];
+    const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
-        .select('user_id')
-        .eq('role', 'aluno');
+        .select('user_id, role')
+        .in('role', rolesToFetch);
       if (rolesError) throw rolesError;
 
       const studentIds = roles.map((r) => r.user_id);
