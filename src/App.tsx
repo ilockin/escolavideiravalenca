@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/DashboardLayout";
 import LoginPage from "@/pages/LoginPage";
 import CadastroPublico from "@/pages/CadastroPublico";
+import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import DashboardPage from "@/pages/DashboardPage";
 import CursosPage from "@/pages/CursosPage";
 import CourseDetailPage from "@/pages/CourseDetailPage";
@@ -48,6 +49,7 @@ const App = () => (
           <Routes>
             <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
             <Route path="/cadastro" element={<CadastroPublico />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             
             <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>

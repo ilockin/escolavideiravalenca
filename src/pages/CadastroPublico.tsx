@@ -13,6 +13,7 @@ const cadastroSchema = z.object({
   nome: z.string().trim().min(2, 'Nome deve ter pelo menos 2 caracteres').max(100),
   email: z.string().trim().email('E-mail inválido').max(255),
   whatsapp: z.string().trim().min(10, 'WhatsApp inválido').max(20),
+  senha: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres'),
 });
 
 export default function CadastroPublico() {
@@ -21,6 +22,7 @@ export default function CadastroPublico() {
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
+  const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const { toast } = useToast();
@@ -28,7 +30,7 @@ export default function CadastroPublico() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const result = cadastroSchema.safeParse({ nome, email, whatsapp });
+    const result = cadastroSchema.safeParse({ nome, email, whatsapp, senha });
     if (!result.success) {
       toast({
         title: 'Erro de validação',
@@ -40,15 +42,42 @@ export default function CadastroPublico() {
 
     setLoading(true);
     try {
-      const { error } = await supabase.from('enrollments').insert({
+      // Create auth user with password
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password: senha,
+        options: {
+          data: {
+            full_name: nome,
+          },
+        },
+      });
+
+      if (authError) throw authError;
+
+      // Create enrollment record
+      const { error: enrollError } = await supabase.from('enrollments').insert({
         student_name: nome,
         student_email: email,
         student_whatsapp: whatsapp,
         course_id: cursoId,
         status: 'pendente',
+        user_id: authData.user?.id || null,
       });
 
-      if (error) throw error;
+      if (enrollError) throw enrollError;
+
+      // Update profile with whatsapp
+      if (authData.user) {
+        await supabase
+          .from('profiles')
+          .update({ whatsapp })
+          .eq('user_id', authData.user.id);
+      }
+
+      // Sign out after registration so user doesn't stay logged in
+      await supabase.auth.signOut();
+
       setSuccess(true);
     } catch (err: any) {
       toast({
@@ -69,7 +98,7 @@ export default function CadastroPublico() {
             <CheckCircle className="h-16 w-16 text-success mx-auto mb-4" />
             <h2 className="text-xl font-bold mb-2">Cadastro Realizado!</h2>
             <p className="text-muted-foreground">
-              Seu cadastro está pendente de aprovação. Você receberá uma notificação quando for aprovado.
+              Seu cadastro está pendente de aprovação. Verifique seu e-mail para confirmar sua conta. Você receberá uma notificação quando for aprovado.
             </p>
           </CardContent>
         </Card>
@@ -106,6 +135,10 @@ export default function CadastroPublico() {
               <div className="space-y-2">
                 <Label htmlFor="whatsapp">WhatsApp</Label>
                 <Input id="whatsapp" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="(11) 99999-9999" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="senha">Senha</Label>
+                <Input id="senha" type="password" value={senha} onChange={(e) => setSenha(e.target.value)} placeholder="Mínimo 6 caracteres" required />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Search, UserCog, Save, Lock } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
@@ -57,21 +57,18 @@ function ProfileForm({
   const handleSave = async () => {
     setSaving(true);
     try {
-      // Update profile
       const { error: profileError } = await supabase
         .from('profiles')
         .update({ full_name: fullName.trim(), whatsapp: whatsapp.trim() || null })
         .eq('user_id', profile.user_id);
       if (profileError) throw profileError;
 
-      // Update email if changed (only own account)
       if (isOwnAccount && newEmail !== email) {
         const { error: emailError } = await supabase.auth.updateUser({ email: newEmail });
         if (emailError) throw emailError;
         toast({ title: 'Um email de confirmação foi enviado para o novo endereço' });
       }
 
-      // Update password if provided (only own account)
       if (isOwnAccount && newPassword) {
         if (newPassword.length < 6) {
           toast({ title: 'A senha deve ter pelo menos 6 caracteres', variant: 'destructive' });
@@ -80,6 +77,22 @@ function ProfileForm({
         }
         const { error: passError } = await supabase.auth.updateUser({ password: newPassword });
         if (passError) throw passError;
+      }
+
+      // Staff resetting another user's password
+      if (!isOwnAccount && newPassword) {
+        if (newPassword.length < 6) {
+          toast({ title: 'A senha deve ter pelo menos 6 caracteres', variant: 'destructive' });
+          setSaving(false);
+          return;
+        }
+        const { data: sessionData } = await supabase.auth.getSession();
+        const response = await supabase.functions.invoke('admin-reset-password', {
+          body: { target_user_id: profile.user_id, new_password: newPassword },
+        });
+        if (response.error) throw new Error(response.error.message || 'Erro ao redefinir senha');
+        const result = response.data as any;
+        if (result?.error) throw new Error(result.error);
       }
 
       toast({ title: 'Dados atualizados com sucesso' });
@@ -115,18 +128,19 @@ function ProfileForm({
         <Label htmlFor="whatsapp">WhatsApp</Label>
         <Input id="whatsapp" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="(00) 00000-0000" />
       </div>
-      {isOwnAccount && (
-        <div className="space-y-2">
-          <Label htmlFor="password">Nova senha</Label>
-          <Input
-            id="password"
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            placeholder="Deixe em branco para manter a atual"
-          />
-        </div>
-      )}
+      <div className="space-y-2">
+        <Label htmlFor="password">
+          <Lock className="inline h-3.5 w-3.5 mr-1" />
+          {isOwnAccount ? 'Nova senha' : 'Redefinir senha do aluno'}
+        </Label>
+        <Input
+          id="password"
+          type="password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          placeholder={isOwnAccount ? 'Deixe em branco para manter a atual' : 'Nova senha para o aluno'}
+        />
+      </div>
       <Button onClick={handleSave} disabled={saving} className="w-full sm:w-auto">
         <Save className="h-4 w-4 mr-2" />
         {saving ? 'Salvando...' : 'Salvar alterações'}
@@ -142,7 +156,6 @@ export default function ContaPage() {
   const [editingUser, setEditingUser] = useState<UserWithProfile | null>(null);
   const queryClient = useQueryClient();
 
-  // Own profile
   const { data: ownProfile } = useQuery({
     queryKey: ['own-profile', user?.id],
     queryFn: async () => {
@@ -157,11 +170,9 @@ export default function ContaPage() {
     enabled: !!user,
   });
 
-  // All student profiles (staff only)
   const { data: studentProfiles = [] } = useQuery({
     queryKey: ['all-student-profiles'],
     queryFn: async () => {
-      // Get all users with 'aluno' role
       const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
         .select('user_id')
@@ -177,7 +188,6 @@ export default function ContaPage() {
         .in('user_id', studentIds);
       if (error) throw error;
 
-      // Get emails from enrollments as fallback
       const { data: enrollments } = await supabase
         .from('enrollments')
         .select('user_id, student_email')
@@ -210,7 +220,6 @@ export default function ContaPage() {
         <p className="text-muted-foreground">Gerencie suas informações pessoais</p>
       </div>
 
-      {/* Own profile */}
       {ownProfile && (
         <Card>
           <CardHeader>
@@ -231,12 +240,11 @@ export default function ContaPage() {
         </Card>
       )}
 
-      {/* Staff: manage student accounts */}
       {isStaff && (
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Gerenciar Contas de Alunos</CardTitle>
-            <CardDescription>Edite nome e WhatsApp dos alunos cadastrados</CardDescription>
+            <CardDescription>Edite dados e redefina senhas dos alunos</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="relative max-w-sm">
@@ -283,7 +291,6 @@ export default function ContaPage() {
         </Card>
       )}
 
-      {/* Edit student dialog */}
       <Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
         <DialogContent>
           <DialogHeader>
