@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { CreateStudentDialog } from '@/components/CreateStudentDialog';
 
 interface Profile {
   id: string;
@@ -79,14 +80,12 @@ function ProfileForm({
         if (passError) throw passError;
       }
 
-      // Staff resetting another user's password
       if (!isOwnAccount && newPassword) {
         if (newPassword.length < 6) {
           toast({ title: 'A senha deve ter pelo menos 6 caracteres', variant: 'destructive' });
           setSaving(false);
           return;
         }
-        const { data: sessionData } = await supabase.auth.getSession();
         const response = await supabase.functions.invoke('admin-reset-password', {
           body: { target_user_id: profile.user_id, new_password: newPassword },
         });
@@ -213,6 +212,11 @@ export default function ContaPage() {
       (s.email || '').toLowerCase().includes(search.toLowerCase())
   );
 
+  const invalidateAll = () => {
+    queryClient.invalidateQueries({ queryKey: ['all-student-profiles'] });
+    queryClient.invalidateQueries({ queryKey: ['all-students'] });
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
@@ -242,9 +246,12 @@ export default function ContaPage() {
 
       {isStaff && (
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Gerenciar Contas de Alunos</CardTitle>
-            <CardDescription>Edite dados e redefina senhas dos alunos</CardDescription>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
+            <div>
+              <CardTitle className="text-lg">Gerenciar Contas de Alunos</CardTitle>
+              <CardDescription>Edite dados e redefina senhas dos alunos</CardDescription>
+            </div>
+            <CreateStudentDialog onSuccess={invalidateAll} />
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="relative max-w-sm">
@@ -303,7 +310,7 @@ export default function ContaPage() {
               isOwnAccount={false}
               onSaved={() => {
                 setEditingUser(null);
-                queryClient.invalidateQueries({ queryKey: ['all-student-profiles'] });
+                invalidateAll();
               }}
             />
           )}
