@@ -9,6 +9,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { CsvImportDialog } from '@/components/CsvImportDialog';
+import { useAllStudents } from '@/hooks/useTurmas';
 
 interface Enrollment {
   id: string;
@@ -38,6 +39,8 @@ export default function AlunosPage() {
     },
   });
 
+  const { data: allStudents = [], isLoading: loadingStudents } = useAllStudents();
+
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const updates: Record<string, unknown> = { status };
@@ -60,6 +63,13 @@ export default function AlunosPage() {
           e.student_name.toLowerCase().includes(search.toLowerCase()) ||
           e.student_email.toLowerCase().includes(search.toLowerCase())
       );
+
+  const filteredAllStudents = allStudents.filter(
+    (s) =>
+      !search ||
+      (s.full_name || '').toLowerCase().includes(search.toLowerCase()) ||
+      (s.email || '').toLowerCase().includes(search.toLowerCase())
+  );
 
   const EmptyState = ({ message }: { message: string }) => (
     <Card className="glass-card">
@@ -121,8 +131,9 @@ export default function AlunosPage() {
         <CsvImportDialog onSuccess={() => queryClient.invalidateQueries({ queryKey: ['enrollments'] })} />
       </div>
 
-      <Tabs defaultValue="pendentes" className="w-full">
+      <Tabs defaultValue="todos" className="w-full">
         <TabsList>
+          <TabsTrigger value="todos">Todos ({allStudents.length})</TabsTrigger>
           <TabsTrigger value="pendentes">Pendentes ({filtered('pendente').length})</TabsTrigger>
           <TabsTrigger value="aprovados">Aprovados ({filtered('aprovado').length})</TabsTrigger>
           <TabsTrigger value="reprovados">Reprovados ({filtered('reprovado').length})</TabsTrigger>
@@ -135,6 +146,34 @@ export default function AlunosPage() {
           </div>
         </div>
 
+        <TabsContent value="todos" className="mt-4">
+          {loadingStudents ? (
+            <p>Carregando...</p>
+          ) : filteredAllStudents.length === 0 ? (
+            <EmptyState message="Nenhum aluno cadastrado" />
+          ) : (
+            <Card className="glass-card overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>WhatsApp</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredAllStudents.map((s) => (
+                    <TableRow key={s.user_id}>
+                      <TableCell className="font-medium">{s.full_name || '—'}</TableCell>
+                      <TableCell>{s.email || '—'}</TableCell>
+                      <TableCell>{s.whatsapp || '—'}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          )}
+        </TabsContent>
         <TabsContent value="pendentes" className="mt-4">
           {isLoading ? <p>Carregando...</p> : <EnrollmentTable items={filtered('pendente')} showActions />}
         </TabsContent>
