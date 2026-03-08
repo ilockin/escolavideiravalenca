@@ -167,6 +167,25 @@ export function useCreateModule() {
   });
 }
 
+export function useUpdateModule() {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  return useMutation({
+    mutationFn: async ({ id, courseId, ...updates }: { id: string; courseId: string } & Partial<TablesInsert<'modules'>>) => {
+      const { data, error } = await supabase.from('modules').update(updates).eq('id', id).select().single();
+      if (error) throw error;
+      return { ...data, courseId };
+    },
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: ['modules', data.courseId] });
+      toast({ title: 'Módulo atualizado!' });
+    },
+    onError: (err: any) => {
+      toast({ title: 'Erro ao atualizar módulo', description: err.message, variant: 'destructive' });
+    },
+  });
+}
+
 export function useDeleteModule() {
   const qc = useQueryClient();
   const { toast } = useToast();
