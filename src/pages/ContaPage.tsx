@@ -169,8 +169,9 @@ export default function ContaPage() {
     enabled: !!user,
   });
 
+  const currentRole = role;
   const { data: studentProfiles = [] } = useQuery({
-    queryKey: ['all-student-profiles'],
+    queryKey: ['all-student-profiles', currentRole],
     queryFn: async () => {
     // Professors can only see alunos; editors can see alunos and professors
     const rolesToFetch = currentRole === 'editor' ? ['aluno', 'professor'] : ['aluno'];
