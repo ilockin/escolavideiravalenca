@@ -210,7 +210,7 @@ export default function TurmasPage() {
     return (
       <div className="space-y-6 animate-fade-in">
         <h1 className="text-2xl font-bold">{turma?.name ?? 'Turma'}</h1>
-        <TurmaDetail turmaId={selectedTurma} onClose={() => setSelectedTurma(null)} />
+        <TurmaDetail turmaId={selectedTurma} inviteCode={(turma as any)?.invite_code ?? ''} onClose={() => setSelectedTurma(null)} />
       </div>
     );
   }
