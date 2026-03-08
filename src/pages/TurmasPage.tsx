@@ -153,7 +153,7 @@ function TurmaDetail({ turmaId, onClose }: { turmaId: string; onClose: () => voi
               <TableBody>
                 {turmaStudents.map((ts: any) => (
                   <TableRow key={ts.id}>
-                    <TableCell>{(ts.profiles as any)?.full_name || ts.user_id}</TableCell>
+                    <TableCell>{(ts.profiles as any)?.full_name || 'Sem nome'}</TableCell>
                     <TableCell className="text-right">
                       <Button variant="ghost" size="sm" onClick={() => removeStudent.mutate({ turma_id: turmaId, user_id: ts.user_id })}>
                         <Trash2 className="h-4 w-4 text-destructive" />

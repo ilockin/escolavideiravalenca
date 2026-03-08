@@ -11,6 +11,13 @@ export interface Turma {
   updated_at: string;
 }
 
+export interface StudentProfile {
+  user_id: string;
+  full_name: string | null;
+  whatsapp: string | null;
+  email?: string;
+}
+
 export function useTurmas() {
   return useQuery({
     queryKey: ['turmas'],
@@ -173,14 +180,31 @@ export function useAllStudents() {
         .select('user_id')
         .eq('role', 'aluno');
       if (error) throw error;
-      if (!roles.length) return [];
+      if (!roles.length) return [] as StudentProfile[];
+
+      const studentIds = roles.map(r => r.user_id);
 
       const { data: profiles, error: pErr } = await supabase
         .from('profiles')
-        .select('user_id, full_name')
-        .in('user_id', roles.map(r => r.user_id));
+        .select('user_id, full_name, whatsapp')
+        .in('user_id', studentIds);
       if (pErr) throw pErr;
-      return profiles ?? [];
+
+      // Get emails from enrollments
+      const { data: enrollments } = await supabase
+        .from('enrollments')
+        .select('user_id, student_email')
+        .in('user_id', studentIds);
+
+      const emailMap = new Map<string, string>();
+      enrollments?.forEach(e => {
+        if (e.user_id) emailMap.set(e.user_id, e.student_email);
+      });
+
+      return (profiles ?? []).map(p => ({
+        ...p,
+        email: emailMap.get(p.user_id) || '',
+      })) as StudentProfile[];
     },
   });
 }
