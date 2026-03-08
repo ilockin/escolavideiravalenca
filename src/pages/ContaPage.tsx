@@ -173,8 +173,7 @@ export default function ContaPage() {
   const { data: studentProfiles = [] } = useQuery({
     queryKey: ['all-student-profiles', currentRole],
     queryFn: async () => {
-    // Professors can only see alunos; editors can see alunos and professors
-    const rolesToFetch = currentRole === 'editor' ? ['aluno', 'professor'] : ['aluno'];
+    const rolesToFetch: Array<'aluno' | 'editor' | 'professor'> = currentRole === 'editor' ? ['aluno', 'professor'] : ['aluno'];
     const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
         .select('user_id, role')
