@@ -383,6 +383,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           id: string
+          invite_code: string
           name: string
           updated_at: string | null
         }
@@ -391,6 +392,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          invite_code?: string
           name: string
           updated_at?: string | null
         }
@@ -399,6 +401,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          invite_code?: string
           name?: string
           updated_at?: string | null
         }
