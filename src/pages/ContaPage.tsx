@@ -251,7 +251,7 @@ export default function ContaPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
-              <CardTitle className="text-lg">Gerenciar Contas de Alunos</CardTitle>
+              <CardTitle className="text-lg">Gerenciar Contas</CardTitle>
               <CardDescription>Edite dados e redefina senhas dos alunos</CardDescription>
             </div>
             <CreateStudentDialog onSuccess={invalidateAll} />
