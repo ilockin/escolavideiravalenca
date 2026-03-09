@@ -39,6 +39,9 @@ export default function LessonPlayerPage() {
 
   const isStaff = role === 'editor' || role === 'professor';
 
+  // Track attendance time (only for students)
+  useLessonTimer(!isStaff ? lessonId : undefined, !isStaff ? user?.id : undefined);
+
   const { data: lesson, isLoading: loadingLesson } = useQuery({
     queryKey: ['lesson', lessonId],
     enabled: !!lessonId,
