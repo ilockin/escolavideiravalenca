@@ -133,6 +133,41 @@ export type Database = {
           },
         ]
       }
+      lesson_analytics: {
+        Row: {
+          created_at: string
+          date: string
+          duration_seconds: number
+          id: string
+          lesson_id: string
+          student_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          duration_seconds?: number
+          id?: string
+          lesson_id: string
+          student_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          duration_seconds?: number
+          id?: string
+          lesson_id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_analytics_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_progress: {
         Row: {
           completed: boolean | null
@@ -385,27 +420,36 @@ export type Database = {
           created_at: string | null
           created_by: string | null
           description: string | null
+          end_date: string | null
           id: string
           invite_code: string
+          min_attendance_percent: number
           name: string
+          start_date: string | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          end_date?: string | null
           id?: string
           invite_code?: string
+          min_attendance_percent?: number
           name: string
+          start_date?: string | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           created_by?: string | null
           description?: string | null
+          end_date?: string | null
           id?: string
           invite_code?: string
+          min_attendance_percent?: number
           name?: string
+          start_date?: string | null
           updated_at?: string | null
         }
         Relationships: []
