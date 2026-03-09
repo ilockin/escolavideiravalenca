@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { LessonQuiz } from '@/components/LessonQuiz';
 import { LessonComments } from '@/components/LessonComments';
 import { generateCertificate } from '@/lib/generateCertificate';
+import { useLessonTimer } from '@/hooks/useLessonTimer';
 import type { Tables } from '@/integrations/supabase/types';
 
 function extractYouTubeId(url: string): string | null {
