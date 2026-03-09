@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Loader2, Trash2, Users, BookOpen, X, ChevronRight, Link2, Copy, Check } from 'lucide-react';
+import { Plus, Loader2, Trash2, Users, BookOpen, X, ChevronRight, Link2, Copy, Check, ClipboardCheck } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   useTurmas, useCreateTurma, useDeleteTurma,
@@ -23,15 +23,24 @@ function CreateTurmaDialog() {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [minAttendance, setMinAttendance] = useState('75');
   const { user } = useAuth();
   const createTurma = useCreateTurma();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-    await createTurma.mutateAsync({ name: name.trim(), description: description.trim() || null, created_by: user?.id ?? null });
-    setName('');
-    setDescription('');
+    await createTurma.mutateAsync({
+      name: name.trim(),
+      description: description.trim() || null,
+      created_by: user?.id ?? null,
+      start_date: startDate || null,
+      end_date: endDate || null,
+      min_attendance_percent: parseFloat(minAttendance) || 75,
+    } as any);
+    setName(''); setDescription(''); setStartDate(''); setEndDate(''); setMinAttendance('75');
     setOpen(false);
   };
 
@@ -50,6 +59,20 @@ function CreateTurmaDialog() {
           <div className="space-y-2">
             <Label>Descrição</Label>
             <Textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Descrição..." rows={2} />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label>Data Início</Label>
+              <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Data Fim</Label>
+              <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>Presença Mínima (%)</Label>
+            <Input type="number" min="0" max="100" value={minAttendance} onChange={e => setMinAttendance(e.target.value)} />
           </div>
           <Button type="submit" className="w-full" disabled={createTurma.isPending}>
             {createTurma.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

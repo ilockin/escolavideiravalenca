@@ -10,8 +10,9 @@ import {
   BarChart3,
   MessageSquare,
   Upload,
-  UserCog } from
-'lucide-react';
+  UserCog,
+  ClipboardCheck,
+} from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import {
   Sidebar,
@@ -36,6 +37,7 @@ const editorItems = [
 { title: 'Importar CSV', url: '/importar', icon: Upload },
 { title: 'Notificações', url: '/notificacoes', icon: Bell },
 { title: 'Relatórios', url: '/relatorios', icon: BarChart3 },
+{ title: 'Presença', url: '/presenca', icon: ClipboardCheck },
 { title: 'Gestão de Contas', url: '/conta', icon: UserCog },
 { title: 'Configurações', url: '/configuracoes', icon: Settings }];
 
@@ -48,6 +50,7 @@ const professorItems = [
 { title: 'Importar CSV', url: '/importar', icon: Upload },
 { title: 'Notificações', url: '/notificacoes', icon: Bell },
 { title: 'Relatórios', url: '/relatorios', icon: BarChart3 },
+{ title: 'Presença', url: '/presenca', icon: ClipboardCheck },
 { title: 'Comentários', url: '/comentarios', icon: MessageSquare },
 { title: 'Desempenho', url: '/desempenho', icon: BarChart3 },
 { title: 'Gestão de Contas', url: '/conta', icon: UserCog },

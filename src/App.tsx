@@ -15,6 +15,7 @@ import CourseDetailPage from "@/pages/CourseDetailPage";
 import LessonPlayerPage from "@/pages/LessonPlayerPage";
 import AlunosPage from "@/pages/AlunosPage";
 import TurmasPage from "@/pages/TurmasPage";
+import PresencaPage from "@/pages/PresencaPage";
 import ContaPage from "@/pages/ContaPage";
 import NotFound from "./pages/NotFound";
 
@@ -61,6 +62,7 @@ const App = () => (
               <Route path="/cursos/:courseId/aula/:lessonId" element={<LessonPlayerPage />} />
               <Route path="/alunos" element={<AlunosPage />} />
               <Route path="/turmas" element={<TurmasPage />} />
+              <Route path="/presenca" element={<PresencaPage />} />
               <Route path="/professores" element={<DashboardPage />} />
               <Route path="/importar" element={<DashboardPage />} />
               <Route path="/notificacoes" element={<DashboardPage />} />

@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { LessonQuiz } from '@/components/LessonQuiz';
 import { LessonComments } from '@/components/LessonComments';
 import { generateCertificate } from '@/lib/generateCertificate';
+import { useLessonTimer } from '@/hooks/useLessonTimer';
 import type { Tables } from '@/integrations/supabase/types';
 
 function extractYouTubeId(url: string): string | null {
@@ -37,6 +38,9 @@ export default function LessonPlayerPage() {
   const [quizScore, setQuizScore] = useState<number | null>(null);
 
   const isStaff = role === 'editor' || role === 'professor';
+
+  // Track attendance time (only for students)
+  useLessonTimer(!isStaff ? lessonId : undefined, !isStaff ? user?.id : undefined);
 
   const { data: lesson, isLoading: loadingLesson } = useQuery({
     queryKey: ['lesson', lessonId],
