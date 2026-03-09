@@ -10,8 +10,9 @@ import {
   BarChart3,
   MessageSquare,
   Upload,
-  UserCog } from
-'lucide-react';
+  UserCog,
+  ClipboardCheck,
+} from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import {
   Sidebar,
