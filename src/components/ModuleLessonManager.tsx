@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +18,15 @@ function extractYouTubeId(url: string): string | null {
   return match ? match[1] : null;
 }
 
-function LessonsList({ moduleId, courseId, canEdit }: { moduleId: string; courseId: string; canEdit: boolean }) {
+function isModuleLocked(module: Module): boolean {
+  if (!module.is_released) return true;
+  const now = new Date();
+  if (module.release_date && new Date(module.release_date) > now) return true;
+  if (module.close_date && new Date(module.close_date) < now) return true;
+  return false;
+}
+
+function LessonsList({ moduleId, courseId, canEdit, locked }: { moduleId: string; courseId: string; canEdit: boolean; locked: boolean }) {
   const { data: lessons = [], isLoading } = useLessons(moduleId);
   const navigate = useNavigate();
   const deleteLesson = useDeleteLesson();
@@ -47,9 +56,17 @@ function LessonsList({ moduleId, courseId, canEdit }: { moduleId: string; course
       {lessons.map((lesson, i) => {
         const videoId = lesson.youtube_url ? extractYouTubeId(lesson.youtube_url) : null;
         return (
-          <div key={lesson.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent/50 group cursor-pointer" onClick={() => navigate(`/cursos/${courseId}/aula/${lesson.id}`)}>
+          <div
+            key={lesson.id}
+            className={`flex items-center gap-3 p-2 rounded-lg group ${
+              locked
+                ? 'opacity-50 cursor-not-allowed'
+                : 'hover:bg-accent/50 cursor-pointer'
+            }`}
+            onClick={() => !locked && navigate(`/cursos/${courseId}/aula/${lesson.id}`)}
+          >
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 text-primary text-xs font-medium shrink-0">
-              {i + 1}
+              {locked ? <Lock className="h-3.5 w-3.5 text-muted-foreground" /> : i + 1}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{lesson.title}</p>
@@ -208,16 +225,21 @@ export function ModuleLessonManager({ courseId, canEdit }: { courseId: string; c
 
 function ModuleItem({ module, index, canEdit, onDelete }: { module: Module; index: number; canEdit: boolean; onDelete: () => void }) {
   const [isOpen, setIsOpen] = useState(index === 0);
+  const { role } = useAuth();
+  const isStaff = role === 'editor' || role === 'professor';
+  const locked = !isStaff && isModuleLocked(module);
 
   return (
-    <Card className="glass-card">
+    <Card className={`glass-card ${locked ? 'opacity-75' : ''}`}>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
           <CardHeader className="py-3 px-4 cursor-pointer hover:bg-accent/30 transition-colors">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary text-sm font-bold">
-                  {index + 1}
+                <div className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold ${
+                  locked ? 'bg-muted text-muted-foreground' : 'bg-primary/10 text-primary'
+                }`}>
+                  {locked ? <Lock className="h-4 w-4" /> : index + 1}
                 </div>
                 <CardTitle className="text-base">{module.title}</CardTitle>
               </div>
@@ -244,7 +266,19 @@ function ModuleItem({ module, index, canEdit, onDelete }: { module: Module; inde
         </CollapsibleTrigger>
         <CollapsibleContent>
           <CardContent className="pt-0 pb-4">
-            <LessonsList moduleId={module.id} courseId={module.course_id} canEdit={canEdit} />
+            {locked && (
+              <div className="mb-3 p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground flex items-center gap-2">
+                <Lock className="h-4 w-4 shrink-0" />
+                <span>
+                  {module.release_date && new Date(module.release_date) > new Date()
+                    ? `Liberação em ${new Date(module.release_date).toLocaleDateString('pt-BR')}`
+                    : module.close_date && new Date(module.close_date) < new Date()
+                      ? 'Este módulo foi encerrado'
+                      : 'Módulo bloqueado pelo professor'}
+                </span>
+              </div>
+            )}
+            <LessonsList moduleId={module.id} courseId={module.course_id} canEdit={canEdit} locked={locked} />
           </CardContent>
         </CollapsibleContent>
       </Collapsible>
