@@ -38,6 +38,7 @@ const editorItems = [
 { title: 'Notificações', url: '/notificacoes', icon: Bell },
 { title: 'Relatórios', url: '/relatorios', icon: BarChart3 },
 { title: 'Presença', url: '/presenca', icon: ClipboardCheck },
+{ title: 'Mensagens', url: '/mensagens', icon: MessageSquare },
 { title: 'Gestão de Contas', url: '/conta', icon: UserCog },
 { title: 'Configurações', url: '/configuracoes', icon: Settings }];
 
