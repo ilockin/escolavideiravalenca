@@ -7,11 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Plus, Trash2, ChevronDown, Play, Loader2, Layers, HelpCircle, Lock, Unlock } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, Play, Loader2, Layers, HelpCircle, Lock, Unlock, Pencil } from 'lucide-react';
 import { useModules, useLessons, useCreateModule, useDeleteModule, useCreateLesson, useDeleteLesson } from '@/hooks/useCourses';
 import type { Module } from '@/hooks/useCourses';
 import { QuizEditor } from '@/components/QuizEditor';
 import { ModuleSettingsDialog } from '@/components/ModuleSettingsDialog';
+import { LessonEditDialog } from '@/components/LessonEditDialog';
 
 function extractYouTubeId(url: string): string | null {
   const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([a-zA-Z0-9_-]{11})/);
