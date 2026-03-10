@@ -59,6 +59,7 @@ const professorItems = [
 const alunoItems = [
 { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
 { title: 'Meus Cursos', url: '/meus-cursos', icon: BookOpen },
+{ title: 'Minhas Conversas', url: '/mensagens', icon: MessageSquare },
 { title: 'Certificados', url: '/certificados', icon: FileText },
 { title: 'Minha Conta', url: '/conta', icon: UserCog }];
 
