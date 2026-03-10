@@ -16,6 +16,7 @@ import LessonPlayerPage from "@/pages/LessonPlayerPage";
 import AlunosPage from "@/pages/AlunosPage";
 import TurmasPage from "@/pages/TurmasPage";
 import PresencaPage from "@/pages/PresencaPage";
+import RelatoriosProvasPage from "@/pages/RelatoriosProvasPage";
 import ContaPage from "@/pages/ContaPage";
 import NotFound from "./pages/NotFound";
 
