@@ -11,8 +11,8 @@ import {
   MessageSquare,
   Upload,
   UserCog,
-  ClipboardCheck,
-} from 'lucide-react';
+  ClipboardCheck } from
+'lucide-react';
 import { NavLink } from '@/components/NavLink';
 import {
   Sidebar,
@@ -129,7 +129,7 @@ export function AppSidebar({ role }: AppSidebarProps) {
       <SidebarFooter className="p-3">
         {!collapsed &&
         <div className="rounded-lg bg-sidebar-accent/50 p-3">
-            <p className="text-[11px] text-sidebar-foreground/50">
+            <p className="text-[11px] text-primary">
               {role === 'editor' ? 'Super Admin' : role === 'professor' ? 'Professor' : 'Aluno'}
             </p>
           </div>
