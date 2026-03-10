@@ -18,6 +18,7 @@ import TurmasPage from "@/pages/TurmasPage";
 import PresencaPage from "@/pages/PresencaPage";
 import RelatoriosProvasPage from "@/pages/RelatoriosProvasPage";
 import ContaPage from "@/pages/ContaPage";
+import MensagensPage from "@/pages/MensagensPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
