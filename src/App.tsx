@@ -18,6 +18,7 @@ import TurmasPage from "@/pages/TurmasPage";
 import PresencaPage from "@/pages/PresencaPage";
 import RelatoriosProvasPage from "@/pages/RelatoriosProvasPage";
 import ContaPage from "@/pages/ContaPage";
+import MensagensPage from "@/pages/MensagensPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -69,7 +70,7 @@ const App = () => (
               <Route path="/notificacoes" element={<DashboardPage />} />
               <Route path="/relatorios" element={<RelatoriosProvasPage />} />
               <Route path="/configuracoes" element={<DashboardPage />} />
-              <Route path="/comentarios" element={<DashboardPage />} />
+              <Route path="/mensagens" element={<MensagensPage />} />
               <Route path="/desempenho" element={<DashboardPage />} />
               <Route path="/meus-cursos" element={<CursosPage />} />
               <Route path="/certificados" element={<DashboardPage />} />

@@ -38,6 +38,7 @@ const editorItems = [
 { title: 'Notificações', url: '/notificacoes', icon: Bell },
 { title: 'Relatórios', url: '/relatorios', icon: BarChart3 },
 { title: 'Presença', url: '/presenca', icon: ClipboardCheck },
+{ title: 'Mensagens', url: '/mensagens', icon: MessageSquare },
 { title: 'Gestão de Contas', url: '/conta', icon: UserCog },
 { title: 'Configurações', url: '/configuracoes', icon: Settings }];
 
@@ -51,8 +52,7 @@ const professorItems = [
 { title: 'Notificações', url: '/notificacoes', icon: Bell },
 { title: 'Relatórios', url: '/relatorios', icon: BarChart3 },
 { title: 'Presença', url: '/presenca', icon: ClipboardCheck },
-{ title: 'Comentários', url: '/comentarios', icon: MessageSquare },
-{ title: 'Desempenho', url: '/desempenho', icon: BarChart3 },
+{ title: 'Mensagens', url: '/mensagens', icon: MessageSquare },
 { title: 'Gestão de Contas', url: '/conta', icon: UserCog },
 { title: 'Configurações', url: '/configuracoes', icon: Settings }];
 
@@ -60,6 +60,7 @@ const professorItems = [
 const alunoItems = [
 { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
 { title: 'Meus Cursos', url: '/meus-cursos', icon: BookOpen },
+{ title: 'Minhas Conversas', url: '/mensagens', icon: MessageSquare },
 { title: 'Certificados', url: '/certificados', icon: FileText },
 { title: 'Minha Conta', url: '/conta', icon: UserCog }];
 
