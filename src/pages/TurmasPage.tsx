@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Loader2, Trash2, Users, BookOpen, X, ChevronRight, Link2, Copy, Check, ClipboardCheck } from 'lucide-react';
+import { EditTurmaDialog } from '@/components/EditTurmaDialog';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   useTurmas, useCreateTurma, useDeleteTurma,
