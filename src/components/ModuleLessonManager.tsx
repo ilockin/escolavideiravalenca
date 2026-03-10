@@ -86,6 +86,7 @@ function LessonsList({ moduleId, courseId, canEdit, locked }: { moduleId: string
             </div>
             {canEdit && (
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
+                <LessonEditDialog lesson={lesson} />
                 <Button
                   variant="ghost"
                   size="icon"
