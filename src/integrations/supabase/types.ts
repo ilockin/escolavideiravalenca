@@ -206,6 +206,8 @@ export type Database = {
       lessons: {
         Row: {
           created_at: string | null
+          description: string | null
+          external_links: Json | null
           has_quiz: boolean | null
           id: string
           module_id: string
@@ -215,6 +217,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          description?: string | null
+          external_links?: Json | null
           has_quiz?: boolean | null
           id?: string
           module_id: string
@@ -224,6 +228,8 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          description?: string | null
+          external_links?: Json | null
           has_quiz?: boolean | null
           id?: string
           module_id?: string
@@ -314,6 +320,47 @@ export type Database = {
           whatsapp?: string | null
         }
         Relationships: []
+      }
+      quiz_attempts: {
+        Row: {
+          answers: Json
+          created_at: string
+          id: string
+          lesson_id: string
+          passed: boolean
+          score: number
+          total_questions: number
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          created_at?: string
+          id?: string
+          lesson_id: string
+          passed?: boolean
+          score?: number
+          total_questions?: number
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          passed?: boolean
+          score?: number
+          total_questions?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_attempts_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       quiz_questions: {
         Row: {

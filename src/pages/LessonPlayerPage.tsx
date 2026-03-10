@@ -307,6 +307,30 @@ export default function LessonPlayerPage() {
         </Card>
       )}
 
+      {/* Description & Links */}
+      {((lesson as any).description || (Array.isArray((lesson as any).external_links) && (lesson as any).external_links.length > 0)) && (
+        <Card className="glass-card">
+          <CardContent className="py-4 space-y-3">
+            {(lesson as any).description && (
+              <div>
+                <p className="text-sm font-medium mb-1">Descrição</p>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{(lesson as any).description}</p>
+              </div>
+            )}
+            {Array.isArray((lesson as any).external_links) && (lesson as any).external_links.length > 0 && (
+              <div>
+                <p className="text-sm font-medium mb-1">Links Externos</p>
+                <div className="space-y-1">
+                  {((lesson as any).external_links as string[]).map((link, i) => (
+                    <a key={i} href={link} target="_blank" rel="noopener noreferrer" className="block text-sm text-primary hover:underline truncate">{link}</a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Quiz Section */}
       {hasQuiz && !isCompleted && (
         <LessonQuiz lessonId={lessonId!} onPass={handleQuizPass} />

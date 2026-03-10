@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -26,6 +27,7 @@ export function LessonQuiz({ lessonId, onPass }: QuizProps) {
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [submitted, setSubmitted] = useState(false);
+  const { user } = useAuth();
 
   const { data: questions = [], isLoading } = useQuery({
     queryKey: ['quiz-questions', lessonId],
@@ -37,6 +39,20 @@ export function LessonQuiz({ lessonId, onPass }: QuizProps) {
         .order('position', { ascending: true });
       if (error) throw error;
       return data as QuizQuestion[];
+    },
+  });
+
+  const saveAttempt = useMutation({
+    mutationFn: async (params: { score: number; passed: boolean; answersData: { questionId: string; selected: number; correct: number; isCorrect: boolean }[] }) => {
+      if (!user) return;
+      await supabase.from('quiz_attempts').insert({
+        user_id: user.id,
+        lesson_id: lessonId,
+        answers: params.answersData as any,
+        score: params.score,
+        total_questions: questions.length,
+        passed: params.passed,
+      });
     },
   });
 
@@ -58,11 +74,19 @@ export function LessonQuiz({ lessonId, onPass }: QuizProps) {
 
   const handleSubmit = () => {
     setSubmitted(true);
-    const correctCount = questions.reduce((acc, q, i) => {
-      return acc + (answers[i] === q.correct_answer ? 1 : 0);
-    }, 0);
+    const answersData = questions.map((q, i) => ({
+      questionId: q.id,
+      selected: answers[i] ?? -1,
+      correct: q.correct_answer,
+      isCorrect: answers[i] === q.correct_answer,
+    }));
+    const correctCount = answersData.filter(a => a.isCorrect).length;
     const score = Math.round((correctCount / totalQuestions) * 100);
-    if (score >= 60) {
+    const passed = score >= 60;
+
+    saveAttempt.mutate({ score, passed, answersData });
+
+    if (passed) {
       onPass(score);
     }
   };
@@ -104,10 +128,9 @@ export function LessonQuiz({ lessonId, onPass }: QuizProps) {
             </div>
             <Progress value={score} className="h-3 max-w-xs mx-auto" />
 
-            {/* Review answers */}
+            {/* Review answers — never reveal correct answer on wrong */}
             <div className="mt-6 space-y-3 text-left max-w-md mx-auto">
               {questions.map((q, i) => {
-                const opts = Array.isArray(q.options) ? (q.options as string[]) : [];
                 const isCorrect = answers[i] === q.correct_answer;
                 return (
                   <div key={q.id} className={`p-3 rounded-lg border ${isCorrect ? 'border-primary/30 bg-primary/5' : 'border-destructive/30 bg-destructive/5'}`}>
@@ -121,7 +144,7 @@ export function LessonQuiz({ lessonId, onPass }: QuizProps) {
                         <p className="text-sm font-medium">{q.question}</p>
                         {!isCorrect && (
                           <p className="text-xs text-muted-foreground mt-1">
-                            Resposta correta: {opts[q.correct_answer] ?? '—'}
+                            Você errou esta questão. Revise o conteúdo e tente novamente.
                           </p>
                         )}
                       </div>
