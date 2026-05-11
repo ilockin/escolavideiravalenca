@@ -13,6 +13,7 @@ import type { Module } from '@/hooks/useCourses';
 import { QuizEditor } from '@/components/QuizEditor';
 import { ModuleSettingsDialog } from '@/components/ModuleSettingsDialog';
 import { LessonEditDialog } from '@/components/LessonEditDialog';
+import { startOfDay } from 'date-fns';
 
 function extractYouTubeId(url: string): string | null {
   const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([a-zA-Z0-9_-]{11})/);
@@ -20,10 +21,23 @@ function extractYouTubeId(url: string): string | null {
 }
 
 function isModuleLocked(module: Module): boolean {
+  const today = startOfDay(new Date());
+  
+  // If module is not released, it's locked
   if (!module.is_released) return true;
-  const now = new Date();
-  if (module.release_date && new Date(module.release_date) > now) return true;
-  if (module.close_date && new Date(module.close_date) < now) return true;
+  
+  // If there's a release date, check if today is before release date
+  if (module.release_date) {
+    const releaseDate = startOfDay(new Date(module.release_date));
+    if (today < releaseDate) return true;
+  }
+  
+  // If there's a close date, check if today is after close date
+  if (module.close_date) {
+    const closeDate = startOfDay(new Date(module.close_date));
+    if (today > closeDate) return true;
+  }
+  
   return false;
 }
 
@@ -246,7 +260,7 @@ function ModuleItem({ module, index, canEdit, onDelete }: { module: Module; inde
                 <CardTitle className="text-base">{module.title}</CardTitle>
               </div>
               <div className="flex items-center gap-2">
-                {module.is_released ? (
+                {!isModuleLocked(module) ? (
                   <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-600">
                     <Unlock className="h-3 w-3" /> Aberto
                   </span>
@@ -272,9 +286,9 @@ function ModuleItem({ module, index, canEdit, onDelete }: { module: Module; inde
               <div className="mb-3 p-3 rounded-lg bg-muted/50 text-sm text-muted-foreground flex items-center gap-2">
                 <Lock className="h-4 w-4 shrink-0" />
                 <span>
-                  {module.release_date && new Date(module.release_date) > new Date()
+                  {module.release_date && startOfDay(new Date(module.release_date)) > startOfDay(new Date())
                     ? `Liberação em ${new Date(module.release_date).toLocaleDateString('pt-BR')}`
-                    : module.close_date && new Date(module.close_date) < new Date()
+                    : module.close_date && startOfDay(new Date(module.close_date)) < startOfDay(new Date())
                       ? 'Este módulo foi encerrado'
                       : 'Módulo bloqueado pelo professor'}
                 </span>

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { format } from 'date-fns';
+import { format, startOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { CalendarIcon, Settings2 } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -32,33 +32,81 @@ export function ModuleSettingsDialog({ module }: { module: Module }) {
   }, [open, module]);
 
   const handleSave = async () => {
+    const today = startOfDay(new Date());
+    let finalIsReleased = isReleased;
+    let finalReleaseType = releaseDate ? 'date' : 'manual';
+
+    // If opening date is today or in the past, forcefully set as released (same as toggle ON)
+    if (releaseDate && startOfDay(releaseDate) <= today) {
+      finalIsReleased = true;
+      finalReleaseType = 'manual'; // Exact same as toggle ON
+    }
+
+    // If closing date is today or in the past, forcefully set as not released (same as toggle OFF)
+    if (closeDate && startOfDay(closeDate) <= today) {
+      finalIsReleased = false;
+      finalReleaseType = 'manual'; // Exact same as toggle OFF
+    }
+
     await updateModule.mutateAsync({
       id: module.id,
       courseId: module.course_id,
-      is_released: isReleased,
+      is_released: finalIsReleased,
       release_date: releaseDate ? releaseDate.toISOString() : null,
-      release_type: releaseDate ? 'scheduled' : 'manual',
+      release_type: finalReleaseType,
       close_date: closeDate ? closeDate.toISOString() : null,
     } as any);
     setOpen(false);
   };
 
   const statusLabel = (() => {
+    const today = startOfDay(new Date());
+    
+    // Module is not released and no release date
     if (!isReleased && !releaseDate) return 'Fechado';
+    
+    // Module is released and no close date
     if (isReleased && !closeDate) return 'Aberto';
+    
+    // Has release date but not released yet
     if (releaseDate && !isReleased) {
-      const now = new Date();
-      if (releaseDate > now) return `Abre em ${format(releaseDate, "dd/MM/yyyy")}`;
+      const releaseDay = startOfDay(releaseDate);
+      if (today < releaseDay) return `Abre em ${format(releaseDate, "dd/MM/yyyy")}`;
+      if (today >= releaseDay) return 'Aberto';
     }
-    if (isReleased && closeDate) {
-      const now = new Date();
-      if (closeDate > now) return `Fecha em ${format(closeDate, "dd/MM/yyyy")}`;
-      return 'Fechado';
+    
+    // Has close date
+    if (closeDate) {
+      const closeDay = startOfDay(closeDate);
+      if (today > closeDay) return 'Fechado';
+      if (today <= closeDay) return `Fecha em ${format(closeDate, "dd/MM/yyyy")}`;
     }
+    
     return isReleased ? 'Aberto' : 'Fechado';
   })();
 
-  const statusColor = isReleased ? 'bg-emerald-500/15 text-emerald-600' : 'bg-amber-500/15 text-amber-600';
+  const isLocked = (() => {
+    const today = startOfDay(new Date());
+    
+    // If module is not released, it's locked
+    if (!isReleased) return true;
+    
+    // If there's a release date, check if today is before release date
+    if (releaseDate) {
+      const releaseDay = startOfDay(releaseDate);
+      if (today < releaseDay) return true;
+    }
+    
+    // If there's a close date, check if today is after close date
+    if (closeDate) {
+      const closeDay = startOfDay(closeDate);
+      if (today > closeDay) return true;
+    }
+    
+    return false;
+  })();
+
+  const statusColor = !isLocked ? 'bg-emerald-500/15 text-emerald-600' : 'bg-amber-500/15 text-amber-600';
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -70,6 +118,9 @@ export function ModuleSettingsDialog({ module }: { module: Module }) {
       <DialogContent className="sm:max-w-md" onClick={(e) => e.stopPropagation()}>
         <DialogHeader>
           <DialogTitle>Configurar Módulo</DialogTitle>
+          <DialogDescription>
+            Configure as datas de abertura e fechamento do módulo, e defina quando ele estará disponível para os alunos.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-6 py-2">
           <div className="flex items-center justify-between rounded-lg border border-border p-4">

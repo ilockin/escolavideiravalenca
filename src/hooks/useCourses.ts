@@ -178,6 +178,8 @@ export function useUpdateModule() {
     },
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ['modules', data.courseId] });
+      qc.invalidateQueries({ queryKey: ['module-single'] });
+      qc.invalidateQueries({ queryKey: ['lessons'] });
       toast({ title: 'Módulo atualizado!' });
     },
     onError: (err: any) => {

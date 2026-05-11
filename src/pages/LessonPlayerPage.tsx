@@ -13,6 +13,7 @@ import { LessonComments } from '@/components/LessonComments';
 import { generateCertificate } from '@/lib/generateCertificate';
 import { useLessonTimer } from '@/hooks/useLessonTimer';
 import type { Tables } from '@/integrations/supabase/types';
+import { startOfDay } from 'date-fns';
 
 function extractYouTubeId(url: string): string | null {
   const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([a-zA-Z0-9_-]{11})/);
@@ -21,10 +22,23 @@ function extractYouTubeId(url: string): string | null {
 
 function isModuleLocked(module: Tables<'modules'> | undefined): boolean {
   if (!module) return true;
+  const today = startOfDay(new Date());
+  
+  // If module is not released, it's locked
   if (!module.is_released) return true;
-  const now = new Date();
-  if (module.release_date && new Date(module.release_date) > now) return true;
-  if (module.close_date && new Date(module.close_date) < now) return true;
+  
+  // If there's a release date, check if today is before release date
+  if (module.release_date) {
+    const releaseDate = startOfDay(new Date(module.release_date));
+    if (today < releaseDate) return true;
+  }
+  
+  // If there's a close date, check if today is after close date
+  if (module.close_date) {
+    const closeDate = startOfDay(new Date(module.close_date));
+    if (today > closeDate) return true;
+  }
+  
   return false;
 }
 
